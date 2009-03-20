@@ -230,6 +230,11 @@ class ChPageController extends DevblocksControllerExtension {
 		if(!empty($preBodyRenderers))
 			$tpl->assign('prebody_renderers', $preBodyRenderers);
 		
+		// Postbody Renderers
+		$postBodyRenderers = DevblocksPlatform::getExtensions('cerberusweb.renderer.postbody', true);
+		if(!empty($postBodyRenderers))
+			$tpl->assign('postbody_renderers', $postBodyRenderers);
+		
 		// Timings
 		$tpl->assign('render_time', (microtime(true) - DevblocksPlatform::getStartTime()));
 		if(function_exists('memory_get_usage') && function_exists('memory_get_peak_usage')) {

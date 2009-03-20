@@ -71,34 +71,45 @@ class ChSignInPage extends CerberusPageExtension {
 		$url_service = DevblocksPlatform::getUrlService();
 		
 		if($inst->authenticate(array('email' => $email, 'password' => $password))) {
-			//authentication passed
-			$original_query = $url_service->parseQueryString($original_query_str);
-			if($original_path[0]=='')
-				unset($original_path[0]);
-			
-			$devblocks_response = new DevblocksHttpResponse($original_path, $original_query);
-			if($devblocks_response->path[0]=='login') {
-				$session = DevblocksPlatform::getSessionService();
-				$visit = $session->getVisit();
-		        $tour_enabled = false;
-				if(!empty($visit) && !is_null($visit->getWorker())) {
-		        	$worker = $visit->getWorker();
-		        	
-					$tour_enabled = intval(DAO_WorkerPref::get($worker->id, 'assist_mode', 1));
-					
-					// Timezone
-					if(null != ($timezone = DAO_WorkerPref::get($worker->id,'timezone'))) {
-						$_SESSION['timezone'] = $timezone;
-						@date_default_timezone_set($timezone);
+
+			// username and password are valid
+			$login_error = Extension_LoginVerify::getLoginError();
+			if ($login_error == null) {
+
+				//authentication passed
+				$original_query = $url_service->parseQueryString($original_query_str);
+				if($original_path[0]=='')
+					unset($original_path[0]);
+				
+				$devblocks_response = new DevblocksHttpResponse($original_path, $original_query);
+				if($devblocks_response->path[0]=='login') {
+					$session = DevblocksPlatform::getSessionService();
+					$visit = $session->getVisit();
+			        $tour_enabled = false;
+					if(!empty($visit) && !is_null($visit->getWorker())) {
+			        	$worker = $visit->getWorker();
+			        	
+						$tour_enabled = intval(DAO_WorkerPref::get($worker->id, 'assist_mode', 1));
+						
+						// Timezone
+						if(null != ($timezone = DAO_WorkerPref::get($worker->id,'timezone'))) {
+							$_SESSION['timezone'] = $timezone;
+							@date_default_timezone_set($timezone);
+						}
+						// Language
+						if(null != ($lang_code = DAO_WorkerPref::get($worker->id,'locale'))) {
+							$_SESSION['locale'] = $lang_code;
+							DevblocksPlatform::setLocale($lang_code);
+						}
 					}
-					// Language
-					if(null != ($lang_code = DAO_WorkerPref::get($worker->id,'locale'))) {
-						$_SESSION['locale'] = $lang_code;
-						DevblocksPlatform::setLocale($lang_code);
-					}
+					$next_page = ($tour_enabled) ?  'welcome' : 'home';				
+					$devblocks_response = new DevblocksHttpResponse(array($next_page));
 				}
-				$next_page = ($tour_enabled) ?  'welcome' : 'home';				
-				$devblocks_response = new DevblocksHttpResponse(array($next_page));
+			}
+			else {
+				//authentication failed with $login_error
+				DevblocksPlatform::getSessionService()->clear(); // logout the user
+				$devblocks_response = new DevblocksHttpResponse(array('login'), array('login_error'=>urlencode($login_error)));
 			}
 		}
 		else {
@@ -122,22 +133,33 @@ class ChSignInPage extends CerberusPageExtension {
 		$url_service = DevblocksPlatform::getUrlService();
 		
 		if($inst->authenticate(array('server' => $server, 'port' => $port, 'dn' => $dn, 'password' => $password))) {
-			//authentication passed
-			$original_query = $url_service->parseQueryString($original_query_str);
-			if($original_path[0]=='')
-				unset($original_path[0]);
+
+			// username and password are valid
+			$login_error = Extension_LoginVerify::getLoginError();
+			if ($login_error == null) {
 			
-			$devblocks_response = new DevblocksHttpResponse($original_path, $original_query);
-			if($devblocks_response->path[0]=='login') {
-				$session = DevblocksPlatform::getSessionService();
-				$visit = $session->getVisit();
-		        $tour_enabled = false;
-				if(!empty($visit) && !is_null($visit->getWorker())) {
-		        	$worker = $visit->getWorker();
-					$tour_enabled = intval(DAO_WorkerPref::get($worker->id, 'assist_mode', 1));
+				//authentication passed
+				$original_query = $url_service->parseQueryString($original_query_str);
+				if($original_path[0]=='')
+					unset($original_path[0]);
+				
+				$devblocks_response = new DevblocksHttpResponse($original_path, $original_query);
+				if($devblocks_response->path[0]=='login') {
+					$session = DevblocksPlatform::getSessionService();
+					$visit = $session->getVisit();
+			        $tour_enabled = false;
+					if(!empty($visit) && !is_null($visit->getWorker())) {
+			        	$worker = $visit->getWorker();
+						$tour_enabled = intval(DAO_WorkerPref::get($worker->id, 'assist_mode', 1));
+					}
+					$next_page = ($tour_enabled) ?  'welcome' : 'home';				
+					$devblocks_response = new DevblocksHttpResponse(array($next_page));
 				}
-				$next_page = ($tour_enabled) ?  'welcome' : 'home';				
-				$devblocks_response = new DevblocksHttpResponse(array($next_page));
+			}
+			else {
+				//authentication failed with $login_error
+				DevblocksPlatform::getSessionService()->clear(); // logout the user
+				$devblocks_response = new DevblocksHttpResponse(array('login'), array('login_error'=>urlencode($login_error)));
 			}
 		}
 		else {

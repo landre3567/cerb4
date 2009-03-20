@@ -45,3 +45,9 @@
 {/if}
 
 {include file="$core_tpl/footer.tpl"}
+
+{if !empty($postbody_renderers)}
+	{foreach from=$postbody_renderers item=renderer}
+		{if !empty($renderer)}{$renderer->render()}{/if}
+	{/foreach}
+{/if}

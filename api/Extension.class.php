@@ -57,6 +57,34 @@ abstract class Extension_AppPreBodyRenderer extends DevblocksExtension {
 	function render() { }
 };
 
+abstract class Extension_AppPostBodyRenderer extends DevblocksExtension {
+	function __construct($manifest) {
+		$this->DevblocksExtension($manifest,1);
+	}
+	
+	function render() { }
+};
+
+abstract class Extension_LoginVerify extends DevblocksExtension {
+	function __construct($manifest) {
+		$this->DevblocksExtension($manifest,1);
+	}
+
+	static function getLoginError() {
+	    $verifiers = DevblocksPlatform::getExtensions('cerberusweb.login.verify');
+	    foreach($verifiers as $verifier) { 
+			$inst = $verifier->createInstance();
+			$res = $inst->verify();
+			if (! empty($res))
+				return $res;
+	    }
+	    return null;
+	}
+	
+	// Retruns an error message (string) if the login should be denied
+	function verify() { return null;}
+};
+
 abstract class CerberusPageExtension extends DevblocksExtension {
 	function __construct($manifest) {
 		$this->DevblocksExtension($manifest,1);

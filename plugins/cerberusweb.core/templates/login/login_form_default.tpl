@@ -1,3 +1,8 @@
+{if $login_error_display}
+<div class="error">
+  {$login_error_display}
+</div>
+{/if}
 <div class="block">
 <form action="{devblocks_url}{/devblocks_url}" method="post" id="loginForm">
 <h2>{$translate->_('header.signon')|capitalize}</h2>
